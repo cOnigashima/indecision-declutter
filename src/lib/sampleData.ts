@@ -1,0 +1,58 @@
+import type { Item } from '../types/item';
+
+const now = Date.now();
+
+export const sampleItems: Record<string, Item> = {
+  'sample-mug': {
+    id: 'sample-mug',
+    name: '祖母のマグカップ',
+    photos: ['sample-photo-1', 'sample-photo-2', 'sample-photo-3'],
+    coverIndex: 0,
+    urgency: 1,
+    status: 'candidate',
+    blockers: ['思い出'],
+    memoryNote: '祖母がいつも縁側で使っていた。もう欠けているけれど、手に取ると時間が戻っていく気がする。',
+    price: 3000,
+    location: '食器棚',
+    createdAt: now - 1000 * 60 * 60 * 24 * 12,
+    updatedAt: now,
+  },
+  'sample-cable': {
+    id: 'sample-cable',
+    name: '充電ケーブル',
+    photos: ['sample-photo-1'],
+    coverIndex: 0,
+    urgency: 3,
+    status: 'candidate',
+    blockers: ['いつか使う'],
+    createdAt: now - 1000 * 60 * 60 * 24,
+    updatedAt: now - 1000 * 60 * 60 * 24,
+  },
+  'discarded-sneaker': {
+    id: 'discarded-sneaker',
+    name: '古いスニーカー',
+    photos: ['sample-photo-1'],
+    coverIndex: 0,
+    urgency: 2,
+    status: 'discarded',
+    blockers: ['まだ使える'],
+    memoryNote: '歩いた距離だけ残っている。写真に残して、玄関からは手放した。',
+    price: 8900,
+    location: '玄関',
+    createdAt: now - 1000 * 60 * 60 * 24 * 34,
+    updatedAt: now,
+    releasedAt: now,
+  },
+  'discarded-cd': {
+    id: 'discarded-cd',
+    name: '昔のCD',
+    photos: ['sample-photo-1', 'sample-photo-2'],
+    coverIndex: 0,
+    urgency: 1,
+    status: 'discarded',
+    blockers: ['思い出'],
+    createdAt: now - 1000 * 60 * 60 * 24 * 44,
+    updatedAt: now - 1000 * 60 * 60 * 24 * 14,
+    releasedAt: now - 1000 * 60 * 60 * 24 * 14,
+  },
+};

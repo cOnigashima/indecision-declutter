@@ -1,71 +1,125 @@
 # 不断捨離 (Indecision Declutter)
 
-> **「捨てられない」を「一時退避」して、断捨離を止めない PWA**
-> _"Don't stop decluttering. Evacuate your hesitation."_
+> 「決断しないで、退避する」ための React Native / Expo アプリ。
 
-<p align="center">
-  <img src="public/pwa-512x512.png" alt="Icon" width="120" />
-</p>
+不断捨離は、片付け中に「捨てるか残すか」で手が止まる瞬間を、写真と記録の一時退避で受け止めるローカルファーストアプリです。
 
-## 概要 (Overview)
+「捨てる」か「残す」かをその場で決めきるのではなく、まず写真に撮って記憶を確保し、物理的な片付けを止めないことを優先します。手放しは削除ではなく、写真と記録を残したまま候補から捨離へ移す「変容」として扱います。
 
-断捨離中に「これ、どうしようかな…」と迷った瞬間、手は止まり、掃除は終わってしまいます。
-**不断捨離**は、その「迷い」を写真に撮ることでデジタル空間へ**一時退避**させ、物理的な片付けをノンストップで進めるためのツールです。
+## Product Principles
 
-「捨てる」か「残す」かではなく、「とりあえずデジタル化して保留」という第3の選択肢を提供します。
+- コア原則は **決断しないで、退避する**。
+- ユーザー向けコピーでは「保存」より **退避** を使う。
+- 手放しは削除ではなく **変容**。記録は捨離に残る。
+- 青の開いた円相は退避、グレーの円相は確認、朱の閉じた円相は手放し完了を表す。
+- バックエンドやクラウド同期は追加しない。端末内に閉じたローカルファーストを守る。
 
-👉 **[開発思想・デザイン哲学はこちら (docs/PHILOSOPHY.md)](docs/PHILOSOPHY.md)**
+## Features
 
-## 特徴 (Features)
+- **迷ったら撮る**
+  カメラでモノを撮影し、捨てたい度を選んで候補へ退避します。1つのモノに複数写真を追加できます。
 
-- **📸 迷ったら撮る (Capture Flow)**
-    - カメラを起動し、写真を撮って「捨てたい度」を選ぶだけ。
-    - 思考停止せずに次々と記録できる「連続撮影ループ」UI。
-    - 画像は端末内で自動圧縮され、容量を圧迫しません。
-- **🧹 2列グリッド整理 (Workbench)**
-    - 撮影したモノは写真メインのグリッドで一覧表示。
-    - 「🔥今すぐ」「👋捨てたい」などの直感的なフィルタリング。
-    - 「#高かった」「#思い出」などの理由タグで分類可能。
-- **👋 安心の手放し (Let Go)**
-    - 詳細画面では、購入価格や最後の使用日、モノへの想いを記録可能。
-    - 決心がついたら「手放す」ボタンへ。データは「捨離リスト」にアーカイブされ、記憶として残り続けます（**記憶の連続性**）。
-- **🍵 和モダン・禅デザイン**
-    - 墨と和紙をイメージした落ち着いた配色。
-    - 焦りを生まない、静かなUI体験。
-- **📱 PWA / Local First**
-    - インストール不要、オフライン動作。
-    - データは全て端末内（IndexedDB）に保存され、プライバシーも安心。
+- **候補ワークベンチ**
+  退避したモノを2列グリッドで一覧できます。捨てたい度や迷った理由タグで絞り込めます。
 
-## 技術スタック (Tech Stack)
+- **記録する**
+  品名、購入価格、最後に使った日、保管場所、迷った理由、想いメモを残せます。
 
-- **Framework:** Vue 3 + Vite
-- **Language:** TypeScript
-- **State/Logic:** Composition API
-- **Database:** Dexie.js (IndexedDB wrapper)
-- **Styling:** Vanilla CSS (CSS Variables for theming)
-- **Icons:** Lucide Vue Next
-- **PWA:** Vite PWA Plugin
+- **手放す**
+  候補から捨離へ移します。写真と記録は残り、捨離詳細から候補へ戻すこともできます。
 
-## 開発環境 (Development)
+- **和モダン・禅のUI**
+  和紙背景、墨、勝色、朱、円相を中心に、焦らせない静かな体験を目指しています。
+
+## Current App
+
+この root は Expo / React Native 版です。旧 Vue/PWA 実装は `legacy/vue-pwa/` に参照用として退避しています。
+
+実装済みの主な範囲:
+
+- Expo SDK 57 + TypeScript
+- React Navigation の候補/捨離タブ、撮影、詳細、編集、ビューア、手放し確認/完了フロー
+- `src/theme/tokens.ts` に集約したデザイントークン
+- Shippori Mincho / Inter のフォント読み込み
+- 円相 PNG アセット
+- SQLite によるローカル永続化
+- カメラ撮影、JPEG圧縮、アプリ内ドキュメント領域への写真保存
+- 候補/捨離リスト、詳細、編集、写真追加、手放し、候補戻し
+- 退避取り消し
+
+残っている主な作業:
+
+- 写真ビューアの more メニューからの表紙設定 / 削除
+- 編集画面での写真削除 / 並べ替え
+- 捨離カードと捨離詳細の視覚処理の仕上げ
+- 375x812 iPhone相当の visual QA
+
+## Tech Stack
+
+- Expo / React Native
+- TypeScript
+- React Navigation
+- Expo SQLite
+- Expo Image Picker / Image Manipulator / File System
+- Expo Image
+- React Native Reanimated
+- Lucide React Native
+- Vitest
+
+## Development
 
 ```bash
-# Install dependencies
 npm install
-
-# Run dev server
-npm run dev
-
-# Build for production
-npm run build
+npm run start
 ```
 
-## ディレクトリ構成
+Expo dev server は `8704` で起動します。
 
-- `src/pages/` - 各画面 (Capture, Workbench, Details)
-- `src/lib/` - DB定義 (Dexie), ロジック (useItems)
-- `src/components/` - 再利用コンポーネント
-- `docs/` - ドキュメント・思想メモ
+```bash
+npm run ios
+npm run android
+npm run web
+npm run typecheck
+npm test
+```
 
-## License
+通常起動ではサンプル私物データを自動投入しません。デモ用 seed が必要な場合だけ、環境変数を明示します。
 
-MIT
+```bash
+EXPO_PUBLIC_SEED_SAMPLE_DATA=1 npm run start
+```
+
+## Storage
+
+iOS / Android では、item は `indecision-declutter.db` に SQLite 保存されます。写真は `FileSystem.documentDirectory/indecision-photos/` 配下にJPEGとしてコピーされます。
+
+Web は動作確認用です。現状のDBはメモリ上に作られるため、リロードすると記録は消えます。本番の保存挙動は実機またはネイティブビルドで確認してください。
+
+## Design Source of Truth
+
+- `docs/specs/product-spec.md`
+- `docs/design/design_handoff_indecision_declutter/README.md`
+- `docs/design/design_handoff_indecision_declutter/不断捨離_完成カンプ.dc.html`
+- `docs/design/design_handoff_indecision_declutter/不断捨離_全体フロー図.dc.html`
+
+`.dc.html` は参照プロトタイプです。製品コードへHTMLをコピーしません。
+
+## Project Structure
+
+- `App.tsx` / `index.ts` - Expo entry
+- `assets/` - app icon-grade enso assets
+- `src/assets/` - UI用 enso assets
+- `src/navigation/` - React Navigation root stack / bottom tabs
+- `src/screens/` - app screens
+- `src/components/` - shared UI components
+- `src/state/` - SQLite-backed app state provider
+- `src/lib/` - SQLite repository, photo storage, form helpers, labels, tests
+- `src/theme/` - design tokens
+- `src/types/` - domain types
+- `docs/specs/` - active product and migration specs
+- `docs/archive/` - resolved or historical review notes
+- `legacy/vue-pwa/` - old Vue/PWA implementation for reference only
+
+## Legacy
+
+`legacy/vue-pwa/` は移行前の Vue 3 / Vite / Dexie / PWA 実装です。思想や初期の説明文は参考になりますが、製品実装先ではありません。

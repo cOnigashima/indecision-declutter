@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "不断捨離",
+    "slug": "indecision-declutter",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/enso-blue.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.onigashima.indecisiondeclutter"
+    },
+    "android": {
+      "package": "com.onigashima.indecisiondeclutter",
+      "adaptiveIcon": {
+        "backgroundColor": "#f4f1ea",
+        "foregroundImage": "./assets/enso-blue.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/enso-blue.png"
+    },
+    "plugins": [
+      "expo-font",
+      "expo-image",
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "迷っているモノを撮影して退避するためにカメラを使用します。",
+          "photosPermission": "撮影済みの写真を不断捨離の記録に追加するために写真へのアクセスを使用します。",
+          "microphonePermission": false
+        }
+      ],
+      "expo-sqlite"
+    ]
+  }
+}

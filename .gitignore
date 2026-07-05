@@ -4,6 +4,10 @@
 # Build output
 /dist
 /dist-ssr
+/.expo
+/web-build
+/android
+/ios
 
 # Vite cache
 /.vite
@@ -18,6 +22,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+.playwright-cli/
+expo-env.d.ts
 
 # Coverage
 /coverage
