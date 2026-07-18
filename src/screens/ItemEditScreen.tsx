@@ -1,3 +1,4 @@
+import DateTimePicker from '@react-native-community/datetimepicker';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { ComponentType } from 'react';
 import {
@@ -15,13 +16,13 @@ import {
 } from 'lucide-react-native';
 import type { LucideProps } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
+import { Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EnsoImage } from '../components/EnsoImage';
 import { EnsoMark } from '../components/EnsoMark';
 import { PhotoFrame } from '../components/PhotoFrame';
-import { formatDateInput } from '../lib/dateLabels';
+import { formatDateInput, parseDateInput } from '../lib/dateLabels';
 import {
   formatPriceInput,
   joinBlockersInput,
@@ -31,18 +32,20 @@ import {
 } from '../lib/itemForm';
 import { coverIndexAfterRemove, mapIndexAfterMove } from '../lib/itemRepositoryRules';
 import { clampPhotoIndex as clampIndex } from '../lib/photoSelection';
-import { captureAndStorePhoto } from '../lib/photoStorage';
+import { promptPhotoSource } from '../lib/photoSourcePrompt';
+import { captureAndStorePhoto, pickAndStorePhoto } from '../lib/photoStorage';
 import type { RootStackParamList } from '../navigation/types';
 import { useItems } from '../state/ItemsContext';
 import { useItemLoader } from '../state/useItemLoader';
 import { usePhotoActions } from '../state/usePhotoActions';
-import { colors, fonts, radii, urgency } from '../theme/tokens';
+import { colors, fonts, radii, shadows, urgency, urgencySelector } from '../theme/tokens';
 import type { UrgencyLevel } from '../types/item';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ItemEdit'>;
 
 const urgencyLevels = [3, 2, 1, 0] as const;
-const webNoOutline = { outlineStyle: 'none' } as unknown as TextInputProps['style'];
+const webNoOutline =
+  Platform.OS === 'web' ? ({ outlineStyle: 'none' } as unknown as TextInputProps['style']) : undefined;
 
 export function ItemEditScreen({ navigation, route }: Props) {
   const { addPhoto, updateExistingItem } = useItems();
@@ -54,6 +57,7 @@ export function ItemEditScreen({ navigation, route }: Props) {
   const [priceText, setPriceText] = useState('');
   const [lastUsedAt, setLastUsedAt] = useState('');
   const [location, setLocation] = useState('');
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [coverIndex, setCoverIndex] = useState(0);
   const [blockersText, setBlockersText] = useState('');
   const [memoryNote, setMemoryNote] = useState('');
@@ -79,20 +83,40 @@ export function ItemEditScreen({ navigation, route }: Props) {
     setMemoryNote(item.memoryNote ?? '');
   }, [item]);
 
-  const handleAddPhoto = async () => {
+  const addPhotoFromSource = async (acquire: () => Promise<string | null>) => {
     if (!item) {
       return;
     }
 
     setError(null);
     try {
-      const uri = await captureAndStorePhoto();
+      const uri = await acquire();
       if (uri) {
         await addPhoto(item.id, uri);
       }
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : '写真を追加できませんでした。');
     }
+  };
+
+  const handleAddPhoto = () => {
+    promptPhotoSource({
+      onCamera: () => void addPhotoFromSource(captureAndStorePhoto),
+      onLibrary: () => void addPhotoFromSource(pickAndStorePhoto),
+    });
+  };
+
+  const handleDateValueChange = (selected: Date) => {
+    setLastUsedAt(formatDateInput(selected));
+
+    // Android shows a one-shot dialog; iOS keeps the inline calendar mounted.
+    if (Platform.OS !== 'ios') {
+      setShowDatePicker(false);
+    }
+  };
+
+  const handleSelectToday = () => {
+    handleDateValueChange(new Date());
   };
 
   const handleRemovePhoto = async (index: number) => {
@@ -263,14 +287,18 @@ export function ItemEditScreen({ navigation, route }: Props) {
                   <View style={styles.urgencyCircle}>
                     {active ? (
                       <View key={`edit-selected-${level}`} style={styles.ensoRing}>
-                        <EnsoMark tone="blue" size={80} animated />
+                        <EnsoMark tone="blue" size={urgencySelector.ensoSelected} animated />
                       </View>
                     ) : (
                       <View style={styles.ensoRing}>
-                        <EnsoImage tone="gray" size={72} opacity={0.18} />
+                        <EnsoImage tone="gray" size={urgencySelector.ensoUnselected} opacity={0.18} />
                       </View>
                     )}
-                    <Icon color={active ? colors.kachi : colors.subtext} size={active ? 36 : 33} strokeWidth={2.35} />
+                    <Icon
+                      color={active ? colors.kachi : colors.subtext}
+                      size={active ? urgencySelector.iconSelected : urgencySelector.iconUnselected}
+                      strokeWidth={2.35}
+                    />
                   </View>
                   <Text style={[styles.urgencyLabel, active && styles.selectedUrgencyLabel]}>{urgency[level].label}</Text>
                 </Pressable>
@@ -289,15 +317,30 @@ export function ItemEditScreen({ navigation, route }: Props) {
             suffix="円"
             value={priceText}
           />
-          <InfoInputRow
-            icon={Calendar}
-            label="最後に使った"
-            onChangeText={setLastUsedAt}
-            placeholder="年/月/日"
-            onQuickAction={() => setLastUsedAt(formatDateInput(new Date()))}
-            quickActionLabel="今日"
-            value={lastUsedAt}
-          />
+          <View style={styles.infoRow}>
+            <Calendar color={colors.subtext} size={17} />
+            <Text style={styles.infoLabel}>最後に使った</Text>
+            <View style={styles.infoInputWrap}>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => setShowDatePicker((open) => !open)}
+                style={styles.dateValueButton}
+              >
+                <Text style={[styles.dateValueText, !lastUsedAt && styles.dateValuePlaceholder]}>
+                  {lastUsedAt || '年/月/日'}
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={() => {
+                  handleSelectToday();
+                  setShowDatePicker(false);
+                }}
+                style={styles.quickAction}
+              >
+                <Text style={styles.quickActionText}>今日</Text>
+              </Pressable>
+            </View>
+          </View>
           <InfoInputRow
             icon={MapPin}
             label="保管場所"
@@ -307,6 +350,50 @@ export function ItemEditScreen({ navigation, route }: Props) {
             value={location}
           />
         </View>
+
+        {showDatePicker && Platform.OS === 'ios' ? (
+          <Modal transparent animationType="fade" visible onRequestClose={() => setShowDatePicker(false)}>
+            <Pressable style={styles.datePickerBackdrop} onPress={() => setShowDatePicker(false)}>
+              <Pressable style={styles.datePickerCard} onPress={(event) => event.stopPropagation()}>
+                <View style={styles.datePickerHeader}>
+                  <Text style={styles.datePickerTitle}>最後に使った日</Text>
+                  <View style={styles.datePickerActions}>
+                    <Pressable
+                      accessibilityLabel="今日を選択"
+                      accessibilityRole="button"
+                      onPress={handleSelectToday}
+                      style={styles.quickAction}
+                    >
+                      <Text style={styles.quickActionText}>今日</Text>
+                    </Pressable>
+                    <Pressable accessibilityRole="button" onPress={() => setShowDatePicker(false)}>
+                      <Text style={styles.done}>完了</Text>
+                    </Pressable>
+                  </View>
+                </View>
+                <DateTimePicker
+                  accentColor={colors.kachi}
+                  value={parseDateInput(lastUsedAt) ?? new Date()}
+                  mode="date"
+                  display="inline"
+                  locale="ja-JP"
+                  maximumDate={new Date()}
+                  onValueChange={(_event, selected) => handleDateValueChange(selected)}
+                  style={styles.datePicker}
+                />
+              </Pressable>
+            </Pressable>
+          </Modal>
+        ) : null}
+        {showDatePicker && Platform.OS !== 'ios' ? (
+          <DateTimePicker
+            value={parseDateInput(lastUsedAt) ?? new Date()}
+            mode="date"
+            display="default"
+            maximumDate={new Date()}
+            onValueChange={(_event, selected) => handleDateValueChange(selected)}
+          />
+        ) : null}
 
         <View>
           <View style={styles.labelRow}>
@@ -451,6 +538,54 @@ const styles = StyleSheet.create({
     right: 5,
     textAlign: 'center',
   },
+  dateValueButton: {
+    flex: 1,
+    paddingVertical: 6,
+  },
+  dateValueText: {
+    color: colors.sumi,
+    fontFamily: fonts.sans,
+    fontSize: 18,
+    textAlign: 'right',
+  },
+  dateValuePlaceholder: {
+    color: colors.subtextLight,
+  },
+  datePicker: {
+    width: '100%',
+  },
+  datePickerBackdrop: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(28, 26, 23, 0.45)',
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 12,
+  },
+  datePickerCard: {
+    backgroundColor: colors.card,
+    borderRadius: radii.card,
+    maxWidth: 360,
+    paddingHorizontal: 12,
+    paddingVertical: 16,
+    width: '100%',
+    ...shadows.card,
+  },
+  datePickerActions: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 12,
+  },
+  datePickerHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  datePickerTitle: {
+    color: colors.sumi,
+    fontFamily: fonts.serifSemiBold,
+    fontSize: 17,
+  },
   done: {
     color: colors.kachi,
     fontFamily: fonts.sansBold,
@@ -487,7 +622,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   ensoRing: {
+    alignItems: 'center',
+    bottom: 0,
+    justifyContent: 'center',
+    left: 0,
     position: 'absolute',
+    right: 0,
+    top: 0,
   },
   header: {
     alignItems: 'center',
@@ -659,9 +800,10 @@ const styles = StyleSheet.create({
   },
   urgencyCircle: {
     alignItems: 'center',
-    height: 82,
+    height: urgencySelector.circle,
     justifyContent: 'center',
-    width: 82,
+    overflow: 'hidden',
+    width: urgencySelector.circle,
   },
   urgencyLabel: {
     color: colors.subtext,

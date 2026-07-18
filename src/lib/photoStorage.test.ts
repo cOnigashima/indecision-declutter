@@ -27,7 +27,7 @@ vi.mock('expo-image-manipulator', () => mocks.imageManipulator);
 vi.mock('expo-image-picker', () => mocks.imagePicker);
 vi.mock('./db', () => ({ createId: mocks.createId }));
 
-import { captureAndStorePhoto, deleteStoredPhoto, pickAndStorePhoto } from './photoStorage';
+import { captureAndStorePhoto, deleteStoredPhoto, pickAndStorePhoto, storePhotoFromUri } from './photoStorage';
 
 describe('photoStorage', () => {
   beforeEach(() => {
@@ -101,6 +101,22 @@ describe('photoStorage', () => {
       intermediates: true,
     });
     expect(mocks.fileSystem.deleteAsync).not.toHaveBeenCalled();
+  });
+
+  it('persists a temporary expo-camera photo through the shared normalization path', async () => {
+    await expect(storePhotoFromUri('file:///camera-view/photo.jpg', 1800)).resolves.toBe(
+      'file:///document/indecision-photos/photo-fixed.jpg'
+    );
+
+    expect(mocks.imageManipulator.manipulateAsync).toHaveBeenCalledWith(
+      'file:///camera-view/photo.jpg',
+      [{ resize: { width: 1440 } }],
+      { base64: false, compress: 0.82, format: 'jpeg' }
+    );
+    expect(mocks.fileSystem.copyAsync).toHaveBeenCalledWith({
+      from: 'file:///cache/normalized.jpg',
+      to: 'file:///document/indecision-photos/photo-fixed.jpg',
+    });
   });
 
   it('uses a data URI fallback when no document directory is available', async () => {

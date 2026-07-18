@@ -257,7 +257,7 @@ type RemovePhotoResult = {
 - 捨離の識別は朱基調で行う: 手放し済みバッジ・タグを朱、捨離タブの active 色を朱、捨離一覧の背景を朱がかった washi にする。カード写真は薄化しない。
 - 捨離詳細に朱の閉じた円相バッジを追加する。
 - PhotoViewer を黒背景に寄せる。
-- AppHeader の moon icon / 初回 camera hint の扱いを仕様に合わせる。
+- AppHeader の設定ボタン（項目が未定の間は準備中案内）/ 初回 camera hint の扱いを仕様に合わせる。
 - `.DS_Store` を削除し、`.gitignore` で混入を防ぐ。
 
 受け入れ条件:

@@ -1,0 +1,28 @@
+// generate-enso-reveal-frames.mjs が生成。手で編集しない。
+// 一筆書きリビールの連番フレーム（イージング焼き込み済み・時間軸は線形）。
+export const ensoRevealFrames = [
+  require('./frame-00.png'),
+  require('./frame-01.png'),
+  require('./frame-02.png'),
+  require('./frame-03.png'),
+  require('./frame-04.png'),
+  require('./frame-05.png'),
+  require('./frame-06.png'),
+  require('./frame-07.png'),
+  require('./frame-08.png'),
+  require('./frame-09.png'),
+  require('./frame-10.png'),
+  require('./frame-11.png'),
+  require('./frame-12.png'),
+  require('./frame-13.png'),
+  require('./frame-14.png'),
+  require('./frame-15.png'),
+  require('./frame-16.png'),
+  require('./frame-17.png'),
+  require('./frame-18.png'),
+  require('./frame-19.png'),
+  require('./frame-20.png'),
+  require('./frame-21.png'),
+  require('./frame-22.png'),
+  require('./frame-23.png'),
+] as const;

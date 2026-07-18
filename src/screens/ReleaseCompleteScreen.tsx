@@ -22,7 +22,7 @@ export function ReleaseCompleteScreen({ navigation, route }: Props) {
       <View style={[styles.mainContent, { paddingBottom: Math.max(124, height * 0.16) }]}>
         <View style={[styles.ensoWrap, { height: ensoSize, width: ensoSize }]}>
           <View style={[styles.photoInside, { borderRadius: photoSize / 2, height: photoSize, width: photoSize }]}>
-            <PhotoFrame uri={item?.photos[item.coverIndex] ?? item?.photos[0]} label="写真" contentFit="contain" />
+            <PhotoFrame uri={item?.photos[item.coverIndex] ?? item?.photos[0]} label="写真" contentFit="cover" />
           </View>
           <View pointerEvents="none" style={[styles.enso, { height: ensoSize, transform: [{ scale: ensoDrawScale }], width: ensoSize }]}>
             <EnsoMark tone="shu" size={ensoSize} animated />
@@ -34,20 +34,36 @@ export function ReleaseCompleteScreen({ navigation, route }: Props) {
           記録は「捨離」に残ります。
         </Text>
       </View>
-      <Text style={styles.caption}>— 捨離リストへ移りました —</Text>
-      <Pressable
-        accessibilityRole="button"
-        onPress={() => navigation.replace('Tabs', { screen: 'DiscardedList' })}
-        style={styles.nextButton}
-      >
-        <Text style={styles.nextText}>捨離リストを見る</Text>
-        <ArrowRight color={colors.washi} size={17} />
-      </Pressable>
+      <View style={styles.actions}>
+        <Text style={styles.caption}>— 捨離リストへ移りました —</Text>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => navigation.replace('Tabs', { screen: 'DiscardedList' })}
+          style={styles.nextButton}
+        >
+          <Text style={styles.nextText}>捨離リストを見る</Text>
+          <ArrowRight color={colors.washi} size={17} />
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => navigation.replace('Tabs', { screen: 'CandidateList' })}
+          style={styles.candidateButton}
+        >
+          <Text style={styles.candidateText}>候補一覧へ戻る</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  actions: {
+    bottom: 26,
+    gap: 12,
+    left: 24,
+    position: 'absolute',
+    right: 24,
+  },
   body: {
     color: '#7a5348',
     fontFamily: fonts.serif,
@@ -57,12 +73,27 @@ const styles = StyleSheet.create({
     maxWidth: 260,
     textAlign: 'center',
   },
+  candidateButton: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.72)',
+    borderColor: colors.shuTintStrong,
+    borderRadius: 14,
+    borderWidth: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  candidateText: {
+    color: colors.shu,
+    fontFamily: fonts.sansBold,
+    fontSize: 17,
+  },
   caption: {
-    bottom: 106,
     color: colors.subtextLight,
     fontFamily: fonts.sans,
     fontSize: 15,
-    position: 'absolute',
+    marginBottom: 4,
+    textAlign: 'center',
   },
   enso: {
     position: 'absolute',
@@ -82,15 +113,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: colors.shu,
     borderRadius: 14,
-    bottom: 40,
     flexDirection: 'row',
     gap: 8,
     justifyContent: 'center',
-    left: 24,
     paddingHorizontal: 16,
     paddingVertical: 14,
-    position: 'absolute',
-    right: 24,
   },
   nextText: {
     color: colors.washi,

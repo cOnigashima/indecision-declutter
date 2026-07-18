@@ -447,6 +447,25 @@ describe('db', () => {
     });
   });
 
+  it('edits a discarded item name without changing its status or release date', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-07-05T02:00:00Z'));
+    const { dbModule, fakeDb } = await loadDbModule();
+    fakeDb.seedItem(
+      { id: 'item-a', name: '古いはさみ', status: 'discarded', released_at: 500, updated_at: 10 },
+      ['photo-a']
+    );
+
+    await dbModule.updateItem('item-a', { name: '裁ちばさみ' });
+
+    expect(fakeDb.itemRows.get('item-a')).toMatchObject({
+      name: '裁ちばさみ',
+      status: 'discarded',
+      released_at: 500,
+      updated_at: Date.now(),
+    });
+  });
+
   it('does nothing when updating a missing item', async () => {
     const { dbModule, fakeDb } = await loadDbModule();
 

@@ -4,6 +4,7 @@ import {
   daysBetweenLabel,
   formatDateInput,
   monthDayLabel,
+  parseDateInput,
   relativeDateLabel,
   startOfLocalDayTimestamp,
 } from './dateLabels';
@@ -47,6 +48,32 @@ describe('dateLabels', () => {
   it('formats dates for text inputs with zero-padded month and day', () => {
     expect(formatDateInput(new Date('2026-03-05T10:00:00+09:00'))).toBe('2026-03-05');
     expect(formatDateInput(new Date('2026-11-15T10:00:00+09:00'))).toBe('2026-11-15');
+  });
+
+  it('round-trips YYYY-MM-DD through the date picker at local midnight', () => {
+    const parsed = parseDateInput('2026-03-05');
+    expect(parsed).not.toBeNull();
+    expect(parsed?.getFullYear()).toBe(2026);
+    expect(parsed?.getMonth()).toBe(2);
+    expect(parsed?.getDate()).toBe(5);
+    expect(parsed?.getHours()).toBe(0);
+    // The parsed Date must format back to the exact stored string.
+    expect(formatDateInput(parsed as Date)).toBe('2026-03-05');
+  });
+
+  it('parses month-end dates without rolling over', () => {
+    expect(formatDateInput(parseDateInput('2026-01-31') as Date)).toBe('2026-01-31');
+    expect(formatDateInput(parseDateInput('2024-02-29') as Date)).toBe('2024-02-29');
+    expect(formatDateInput(parseDateInput('2026-12-31') as Date)).toBe('2026-12-31');
+  });
+
+  it('rejects empty, malformed, and impossible calendar dates', () => {
+    expect(parseDateInput()).toBeNull();
+    expect(parseDateInput('')).toBeNull();
+    expect(parseDateInput('2026/03/05')).toBeNull();
+    expect(parseDateInput('2026-3-5')).toBeNull();
+    expect(parseDateInput('2026-02-31')).toBeNull();
+    expect(parseDateInput('2026-13-01')).toBeNull();
   });
 
   it('returns the local-day start used by today counts', () => {

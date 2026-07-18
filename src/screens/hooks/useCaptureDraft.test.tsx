@@ -4,13 +4,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('../../lib/photoStorage', () => ({
   captureAndStorePhoto: vi.fn(),
+  pickAndStorePhoto: vi.fn(),
   deleteStoredPhoto: vi.fn(),
 }));
 
-import { captureAndStorePhoto, deleteStoredPhoto } from '../../lib/photoStorage';
+import { captureAndStorePhoto, deleteStoredPhoto, pickAndStorePhoto } from '../../lib/photoStorage';
 import { useCaptureDraft } from './useCaptureDraft';
 
 const captureMock = vi.mocked(captureAndStorePhoto);
+const pickMock = vi.mocked(pickAndStorePhoto);
 const deleteMock = vi.mocked(deleteStoredPhoto);
 
 describe('useCaptureDraft', () => {
@@ -31,6 +33,34 @@ describe('useCaptureDraft', () => {
     expect(result.current.photos).toEqual(['a.jpg', 'b.jpg']);
     expect(result.current.activeIndex).toBe(1);
     expect(deleteMock).not.toHaveBeenCalled();
+  });
+
+  it('appends a library pick to the same draft as camera captures', async () => {
+    captureMock.mockResolvedValueOnce('shot.jpg');
+    pickMock.mockResolvedValueOnce('library.jpg');
+    const { result } = renderHook(() => useCaptureDraft());
+
+    await act(async () => {
+      await result.current.takePhoto();
+      await result.current.pickPhoto();
+    });
+
+    expect(result.current.photos).toEqual(['shot.jpg', 'library.jpg']);
+    expect(result.current.activeIndex).toBe(1);
+    expect(deleteMock).not.toHaveBeenCalled();
+  });
+
+  it('accepts an in-app camera acquirer without launching the system camera', async () => {
+    const acquire = vi.fn().mockResolvedValue('camera-view.jpg');
+    const { result } = renderHook(() => useCaptureDraft());
+
+    await act(async () => {
+      await result.current.takePhoto(acquire);
+    });
+
+    expect(acquire).toHaveBeenCalledTimes(1);
+    expect(captureMock).not.toHaveBeenCalled();
+    expect(result.current.photos).toEqual(['camera-view.jpg']);
   });
 
   it('keeps the draft when a capture is cancelled', async () => {
@@ -94,6 +124,20 @@ describe('useCaptureDraft', () => {
 
     expect(result.current.photos).toEqual(['a.jpg']);
     expect(deleteMock).not.toHaveBeenCalled();
+  });
+
+  it('retake can replace the active photo from a custom source', async () => {
+    captureMock.mockResolvedValueOnce('a.jpg');
+    const acquire = vi.fn().mockResolvedValue('replacement.jpg');
+    const { result } = renderHook(() => useCaptureDraft());
+
+    await act(async () => {
+      await result.current.takePhoto();
+      await result.current.retakePhoto(acquire);
+    });
+
+    expect(result.current.photos).toEqual(['replacement.jpg']);
+    expect(deleteMock).toHaveBeenCalledWith('a.jpg');
   });
 
   it('cancelDraft deletes every draft file and resets the draft', async () => {

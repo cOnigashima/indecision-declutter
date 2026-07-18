@@ -65,7 +65,7 @@ export function ReleaseConfirmScreen({ navigation, route }: Props) {
       <View style={styles.center}>
         <View style={[styles.ensoWrap, { height: ensoSize, width: ensoSize }]}>
           <View style={[styles.photoInside, { borderRadius: photoSize / 2, height: photoSize, width: photoSize }]}>
-            <PhotoFrame uri={coverPhoto} label="写真" contentFit="contain" />
+            <PhotoFrame uri={coverPhoto} label="写真" contentFit="cover" />
           </View>
           <View pointerEvents="none" style={[styles.grayEnso, { height: ensoSize, transform: [{ scale: ensoDrawScale }], width: ensoSize }]}>
             <EnsoImage tone="gray" size={ensoSize} opacity={0.48} />

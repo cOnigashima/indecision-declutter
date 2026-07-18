@@ -59,7 +59,7 @@ export function EvacuationCompleteScreen({ navigation, route }: Props) {
       <View style={[styles.mainContent, { paddingBottom: Math.max(228, height * 0.26) }]}>
         <View style={[styles.ensoWrap, { height: ensoSize, width: ensoSize }]}>
           <View style={[styles.photoInside, { borderRadius: photoSize / 2, height: photoSize, width: photoSize }]}>
-            <PhotoFrame uri={item?.photos[item.coverIndex] ?? item?.photos[0]} label="写真" contentFit="contain" />
+            <PhotoFrame uri={item?.photos[item.coverIndex] ?? item?.photos[0]} label="写真" contentFit="cover" />
           </View>
           <View pointerEvents="none" style={[styles.enso, { height: ensoSize, transform: [{ scale: ensoDrawScale }], width: ensoSize }]}>
             <EnsoMark tone="blue" size={ensoSize} animated durationMs={520} />

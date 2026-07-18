@@ -24,7 +24,7 @@ export async function captureAndStorePhoto(): Promise<string | null> {
     return null;
   }
 
-  return storePhoto(result.assets[0].uri, result.assets[0].width);
+  return storePhotoFromUri(result.assets[0].uri, result.assets[0].width);
 }
 
 export async function pickAndStorePhoto(): Promise<string | null> {
@@ -38,7 +38,7 @@ export async function pickAndStorePhoto(): Promise<string | null> {
     return null;
   }
 
-  return storePhoto(result.assets[0].uri, result.assets[0].width);
+  return storePhotoFromUri(result.assets[0].uri, result.assets[0].width);
 }
 
 export async function deleteStoredPhoto(uri: string): Promise<void> {
@@ -53,7 +53,11 @@ export async function deleteStoredPhoto(uri: string): Promise<void> {
   }
 }
 
-async function storePhoto(sourceUri: string, width?: number): Promise<string> {
+/**
+ * Copy a temporary image (including one returned by expo-camera) into the
+ * app-managed photo directory after applying the same normalization as picks.
+ */
+export async function storePhotoFromUri(sourceUri: string, width?: number): Promise<string> {
   const actions = width && width > MAX_PHOTO_WIDTH ? [{ resize: { width: MAX_PHOTO_WIDTH } }] : [];
   const normalized = await ImageManipulator.manipulateAsync(sourceUri, actions, {
     base64: !FileSystem.documentDirectory,

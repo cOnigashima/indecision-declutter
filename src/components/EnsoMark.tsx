@@ -1,24 +1,10 @@
-import { useEffect, useId } from 'react';
-import { View } from 'react-native';
-import Svg, {
-  Defs,
-  G,
-  Image as SvgImage,
-  Mask,
-  Path,
-  Rect,
-} from 'react-native-svg';
-import Animated, {
-  Easing,
-  useAnimatedProps,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
+import { useEffect, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { Image } from 'expo-image';
 
-import ensoMono from '../assets/enso-mono-trimmed-solid.png';
+import { ensoRevealFrames } from '../assets/enso-reveal';
+import { revealFrameIndex, settleDelayMs } from '../lib/ensoReveal';
 import { colors } from '../theme/tokens';
-
-const AnimatedPath = Animated.createAnimatedComponent(Path);
 
 const toneColor = {
   blue: colors.kachi,
@@ -28,10 +14,6 @@ const toneColor = {
 
 export type EnsoTone = keyof typeof toneColor;
 
-const REVEAL_PATH = 'M39 82.8 A35 35 0 1 1 67.5 80.3';
-const REVEAL_WIDTH = 34;
-const REVEAL_LENGTH = 220;
-
 type EnsoMarkProps = {
   tone?: EnsoTone;
   size?: number;
@@ -40,6 +22,16 @@ type EnsoMarkProps = {
   opacity?: number;
 };
 
+const FINAL_FRAME = ensoRevealFrames.length - 1;
+
+// 一筆書きリビールは元々 SVG の 2 枚マスク + reanimated で駆動していたが、
+// RN 0.86 Fabric + react-native-svg の iOS では Mask 内ノードの更新が
+// ネイティブ描画に反映されず、途中の弧で凍結する（rAF + setState 駆動や
+// 強制再描画でも解消しないことを実機で確認済み。openspec の change 参照）。
+// そのためリビールを事前レンダリングの連番フレーム
+// （scripts/generate-enso-reveal-frames.mjs が生成、イージング焼き込み済み）
+// にし、実機で動作実績のある expo-image の表示だけで再生する。
+// 全フレームを重ねて opacity で切り替えるので、再生中のデコード待ちも無い。
 export function EnsoMark({
   tone = 'blue',
   size = 190,
@@ -47,64 +39,86 @@ export function EnsoMark({
   durationMs = 420,
   opacity = 1,
 }: EnsoMarkProps) {
-  const id = useId().replace(/:/g, '');
-  const progress = useSharedValue(animated ? 0 : 1);
+  const [frame, setFrame] = useState(animated ? 0 : FINAL_FRAME);
+  const [settled, setSettled] = useState(!animated);
 
   useEffect(() => {
-    progress.value = animated
-      ? withTiming(1, {
-          duration: durationMs,
-          easing: Easing.bezier(0.55, 0, 1, 0.96),
-        })
-      : 1;
-  }, [animated, durationMs, progress]);
+    if (!animated) {
+      setFrame(FINAL_FRAME);
+      setSettled(true);
+      return;
+    }
 
-  const revealProps = useAnimatedProps(() => ({
-    strokeDashoffset: REVEAL_LENGTH * (1 - progress.value),
-  }));
+    setFrame(0);
+    setSettled(false);
 
-  const texId = `enso-tex-${tone}-${id}`;
-  const revId = `enso-rev-${tone}-${id}`;
-  const tinted = (
-    <Rect
-      x={0}
-      y={0}
-      width={100}
-      height={100}
-      fill={toneColor[tone]}
-      mask={`url(#${texId})`}
-    />
-  );
+    let rafId = 0;
+    let startedAt: number | null = null;
+    const tick = (now: number) => {
+      if (startedAt === null) {
+        startedAt = now;
+      }
+      const elapsed = now - startedAt;
+      setFrame(revealFrameIndex(elapsed, durationMs, ensoRevealFrames.length));
+      if (elapsed < durationMs) {
+        rafId = requestAnimationFrame(tick);
+      } else {
+        setSettled(true);
+      }
+    };
+    rafId = requestAnimationFrame(tick);
+
+    // 完走保証。rAF が止まっても必ずフルの円相へ収束させる。
+    const settleTimer = setTimeout(() => {
+      setSettled(true);
+    }, settleDelayMs(durationMs));
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      clearTimeout(settleTimer);
+    };
+  }, [animated, durationMs]);
+
+  const tint = toneColor[tone];
+
+  if (settled) {
+    return (
+      <View style={{ width: size, height: size, opacity }}>
+        <Image
+          source={ensoRevealFrames[FINAL_FRAME]}
+          contentFit="contain"
+          tintColor={tint}
+          style={styles.fill}
+        />
+      </View>
+    );
+  }
 
   return (
     <View style={{ width: size, height: size, opacity }}>
-      <Svg viewBox="0 0 100 100" width={size} height={size}>
-        <Defs>
-          <Mask id={texId} maskUnits="userSpaceOnUse">
-            <SvgImage
-              href={ensoMono}
-              x={0}
-              y={0}
-              width={100}
-              height={100}
-              preserveAspectRatio="xMidYMid meet"
-            />
-          </Mask>
-          <Mask id={revId} maskUnits="userSpaceOnUse">
-            <AnimatedPath
-              d={REVEAL_PATH}
-              stroke="#fff"
-              strokeWidth={REVEAL_WIDTH}
-              strokeLinecap="round"
-              fill="none"
-              strokeDasharray={REVEAL_LENGTH}
-              animatedProps={revealProps}
-            />
-          </Mask>
-        </Defs>
-
-        {animated ? <G mask={`url(#${revId})`}>{tinted}</G> : tinted}
-      </Svg>
+      {ensoRevealFrames.map((source, index) => (
+        <Image
+          key={index}
+          source={source}
+          contentFit="contain"
+          tintColor={tint}
+          style={[styles.frame, { opacity: index === frame ? 1 : 0 }]}
+        />
+      ))}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  fill: {
+    width: '100%',
+    height: '100%',
+  },
+  frame: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+});

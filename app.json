@@ -33,7 +33,25 @@
           "microphonePermission": false
         }
       ],
-      "expo-sqlite"
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "撮影済みの写真を不断捨離の記録に追加するために写真へのアクセスを使用します。",
+          "savePhotosPermission": "手放したモノの画像を端末のライブラリに残すために使用します。",
+          "granularPermissions": []
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "迷っているモノを撮影して退避するためにカメラを使用します。",
+          "microphonePermission": false,
+          "recordAudioAndroid": false,
+          "barcodeScannerEnabled": false
+        }
+      ],
+      "expo-sqlite",
+      "@react-native-community/datetimepicker"
     ]
   }
 }

@@ -30,6 +30,8 @@ export const colors = {
   shuTintStrong: 'rgba(158,59,44,0.14)',
   shuTint: 'rgba(158,59,44,0.08)',
   photoScrim: 'rgba(0,0,0,0.5)',
+  cameraGuideShade: 'rgba(0,0,0,0.2)',
+  cameraGuideLine: 'rgba(255,255,255,0.62)',
   translucentCard: 'rgba(255,255,255,0.92)',
 } as const;
 
@@ -66,25 +68,65 @@ export const urgency = {
   3: {
     label: '今すぐ',
     color: '#dc2626',
+    filterBackground: 'rgba(220,38,38,0.10)',
+    filterBorder: 'rgba(220,38,38,0.28)',
     icon: Flame,
   },
   2: {
     label: '捨てたい',
     color: '#ea580c',
+    filterBackground: 'rgba(234,88,12,0.10)',
+    filterBorder: 'rgba(234,88,12,0.28)',
     icon: Trash2,
   },
   1: {
     label: '迷い',
     color: '#ca8a04',
     editColor: '#a8892e',
+    filterBackground: 'rgba(202,138,4,0.10)',
+    filterBorder: 'rgba(202,138,4,0.28)',
     icon: HelpCircle,
   },
   0: {
     label: '残す',
     color: '#16a34a',
+    filterBackground: 'rgba(22,163,74,0.10)',
+    filterBorder: 'rgba(22,163,74,0.28)',
     icon: Package,
   },
-} satisfies Record<UrgencyLevel, { label: string; color: string; editColor?: string; icon: typeof HelpCircle }>;
+} satisfies Record<
+  UrgencyLevel,
+  {
+    label: string;
+    color: string;
+    editColor?: string;
+    filterBackground: string;
+    filterBorder: string;
+    icon: typeof HelpCircle;
+  }
+>;
+
+// 撮影画面の捨てたい度セレクタ寸法。円相はアイコンより大きく見せつつ、
+// 各選択肢の列幅（画面幅を4等分 ≒ 狭い端末で74pt）の内側に収める。
+// 円相は枠(circle)より一回り小さくして余白を取り、選択時のアニメーション
+// （EnsoMark）が枠へ触れて滲み出さないようにする。
+export const urgencySelector = {
+  circle: 72,
+  ensoSelected: 54,
+  ensoUnselected: 50,
+  iconSelected: 34,
+  iconUnselected: 31,
+} as const;
+
+// 撮影レビューは4択と退避ボタンを同じシートに収めるため、完成カンプの
+// 50ptアイコン枠に寄せた専用寸法を使う。円相のアニメーションも枠内に収める。
+export const captureUrgencySelector = {
+  circle: 60,
+  ensoSelected: 46,
+  ensoUnselected: 42,
+  iconSelected: 24,
+  iconUnselected: 22,
+} as const;
 
 export const shadows = {
   card: {

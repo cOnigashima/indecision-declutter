@@ -1,4 +1,4 @@
-import { Image, type ImageContentFit } from 'expo-image';
+import { Image, type ImageContentFit, type ImageContentPosition } from 'expo-image';
 import { StyleSheet, View, type ImageStyle, type StyleProp, type ViewStyle } from 'react-native';
 
 import { isRenderablePhotoUri } from '../lib/photoUri';
@@ -12,6 +12,7 @@ type PhotoFrameProps = {
   compact?: boolean;
   style?: StyleProp<ImageStyle>;
   contentFit?: ImageContentFit;
+  contentPosition?: ImageContentPosition;
   backgroundColor?: string;
 };
 
@@ -22,6 +23,7 @@ export function PhotoFrame({
   compact = false,
   style,
   contentFit = 'cover',
+  contentPosition = 'center',
   backgroundColor,
 }: PhotoFrameProps) {
   const photoBackgroundColor = backgroundColor ?? colors.photoLight;
@@ -43,6 +45,7 @@ export function PhotoFrame({
       source={{ uri }}
       style={[style ? styles.imageFill : styles.image, compact && styles.compact, { backgroundColor: photoBackgroundColor }, style]}
       contentFit={contentFit}
+      contentPosition={contentPosition}
     />
   );
 }

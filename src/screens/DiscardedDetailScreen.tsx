@@ -1,5 +1,5 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ArrowLeft, RotateCcw } from 'lucide-react-native';
+import { ArrowLeft, Download, RotateCcw } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import {
   Pressable,
@@ -14,11 +14,13 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ActionButton } from '../components/ActionButton';
+import { EditableItemName } from '../components/EditableItemName';
 import { EnsoDivider } from '../components/EnsoDivider';
 import { EnsoImage } from '../components/EnsoImage';
 import { PhotoFrame } from '../components/PhotoFrame';
 import { daysBetweenLabel, monthDayLabel } from '../lib/dateLabels';
 import { formatPriceDisplay } from '../lib/itemForm';
+import { downloadPhotoToLibrary } from '../lib/photoDownload';
 import { clampPhotoIndex as clampIndex } from '../lib/photoSelection';
 import type { RootStackParamList } from '../navigation/types';
 import { useItems } from '../state/ItemsContext';
@@ -28,9 +30,12 @@ import { colors, fonts, radii } from '../theme/tokens';
 type Props = NativeStackScreenProps<RootStackParamList, 'DiscardedDetail'>;
 
 export function DiscardedDetailScreen({ navigation, route }: Props) {
-  const { restoreExistingItem } = useItems();
+  const { restoreExistingItem, updateExistingItem } = useItems();
   const { item, loading, error: loadError } = useItemLoader(route.params.itemId);
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [downloadNotice, setDownloadNotice] = useState<string | null>(null);
   const heroScrollRef = useRef<ScrollView>(null);
   const { width } = useWindowDimensions();
 
@@ -74,6 +79,24 @@ export function DiscardedDetailScreen({ navigation, route }: Props) {
     heroScrollRef.current?.scrollTo({ x: nextIndex * width, animated: true });
   };
 
+  const handleDownloadPhoto = async () => {
+    if (!item || downloading) {
+      return;
+    }
+
+    setDownloading(true);
+    setDownloadError(null);
+    setDownloadNotice(null);
+    try {
+      await downloadPhotoToLibrary(item.photos[activePhotoIndex], item.name, activePhotoIndex);
+      setDownloadNotice('ライブラリに保存しました');
+    } catch (caught) {
+      setDownloadError(caught instanceof Error ? caught.message : '画像をライブラリに保存できませんでした。');
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   if (!item) {
     return (
       <SafeAreaView style={styles.emptyScreen}>
@@ -110,7 +133,7 @@ export function DiscardedDetailScreen({ navigation, route }: Props) {
                 uri={photo}
                 label={`写真 ${index + 1}`}
                 style={styles.heroPhoto}
-                contentFit="contain"
+                contentFit="cover"
                 backgroundColor={colors.washi}
               />
             </Pressable>
@@ -120,7 +143,21 @@ export function DiscardedDetailScreen({ navigation, route }: Props) {
           <Pressable onPress={() => navigation.goBack()} style={styles.roundButton}>
             <ArrowLeft color={colors.sumi} size={22} />
           </Pressable>
+          <Pressable
+            accessibilityLabel="表示中の画像をライブラリに保存"
+            accessibilityRole="button"
+            disabled={downloading}
+            onPress={() => void handleDownloadPhoto()}
+            style={[styles.roundButton, downloading && styles.disabledButton]}
+          >
+            <Download color={colors.sumi} size={21} />
+          </Pressable>
         </SafeAreaView>
+        {downloadError || downloadNotice ? (
+          <View style={[styles.downloadFeedback, downloadError ? styles.downloadFeedbackError : styles.downloadFeedbackSuccess]}>
+            <Text style={styles.downloadFeedbackText}>{downloadError ?? downloadNotice}</Text>
+          </View>
+        ) : null}
         <Pressable style={styles.counter} onPress={() => navigation.navigate('PhotoViewer', { itemId: item.id, index: activePhotoIndex })}>
           <Text style={styles.counterText}>{activePhotoIndex + 1} / {item.photos.length}</Text>
         </Pressable>
@@ -141,7 +178,11 @@ export function DiscardedDetailScreen({ navigation, route }: Props) {
       </View>
 
       <ScrollView style={styles.body} contentContainerStyle={styles.bodyContent}>
-        <Text style={styles.itemName}>{item.name}</Text>
+        <EditableItemName
+          name={item.name}
+          tone="shu"
+          onSave={(name) => updateExistingItem(item.id, { name })}
+        />
         <View style={styles.releasedRow}>
           <EnsoImage tone="shu" size={22} opacity={0.9} />
           <Text style={styles.meta}>
@@ -227,6 +268,30 @@ const styles = StyleSheet.create({
     height: 8,
     width: 8,
   },
+  disabledButton: {
+    opacity: 0.5,
+  },
+  downloadFeedback: {
+    alignSelf: 'center',
+    borderRadius: radii.pill,
+    maxWidth: '82%',
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    position: 'absolute',
+    top: 96,
+  },
+  downloadFeedbackError: {
+    backgroundColor: colors.shuOverlay,
+  },
+  downloadFeedbackSuccess: {
+    backgroundColor: 'rgba(42,42,44,0.78)',
+  },
+  downloadFeedbackText: {
+    color: colors.white,
+    fontFamily: fonts.sansSemiBold,
+    fontSize: 13,
+    textAlign: 'center',
+  },
   dots: {
     alignSelf: 'center',
     bottom: 14,
@@ -276,6 +341,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   heroControls: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     left: 16,
     position: 'absolute',
     right: 16,
@@ -283,12 +350,6 @@ const styles = StyleSheet.create({
   },
   inactiveDot: {
     backgroundColor: 'rgba(146,56,46,0.24)',
-  },
-  itemName: {
-    color: colors.sumi,
-    fontFamily: fonts.serifBold,
-    fontSize: 27,
-    textAlign: 'center',
   },
   meta: {
     color: colors.shu,

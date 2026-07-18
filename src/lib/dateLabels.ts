@@ -40,6 +40,34 @@ export function formatDateInput(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+/**
+ * Parse a stored `YYYY-MM-DD` value back into a local-midnight Date for the
+ * date picker. Returns null for empty/malformed values and for impossible
+ * calendar dates (e.g. 2026-02-31), so callers can fall back to "today".
+ */
+export function parseDateInput(value?: string | null): Date | null {
+  if (!value) {
+    return null;
+  }
+
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim());
+  if (!match) {
+    return null;
+  }
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const date = new Date(year, month - 1, day);
+
+  // Reject values that JS silently rolled over (e.g. month 13, day 31 of Feb).
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+    return null;
+  }
+
+  return date;
+}
+
 export function startOfLocalDayTimestamp(date = new Date()): number {
   const start = new Date(date);
   start.setHours(0, 0, 0, 0);

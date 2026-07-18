@@ -15,6 +15,7 @@
     "@expo-google-fonts/inter": "^0.4.2",
     "@expo-google-fonts/shippori-mincho": "^0.4.1",
     "@expo/metro-runtime": "~57.0.3",
+    "@react-native-community/datetimepicker": "9.1.0",
     "@react-navigation/bottom-tabs": "^7.18.7",
     "@react-navigation/native": "^7.3.7",
     "@react-navigation/native-stack": "^7.17.9",
@@ -25,6 +26,7 @@
     "expo-image": "~57.0.0",
     "expo-image-manipulator": "~57.0.2",
     "expo-image-picker": "~57.0.2",
+    "expo-media-library": "~57.0.1",
     "expo-sqlite": "~57.0.0",
     "expo-status-bar": "~57.0.0",
     "lucide-react-native": "^1.23.0",
@@ -35,7 +37,7 @@
     "react-native-reanimated": "4.5.0",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "4.25.2",
-    "react-native-svg": "15.15.4",
+    "react-native-svg": "15.15.5",
     "react-native-web": "^0.21.2",
     "react-native-worklets": "0.10.0"
   },
@@ -45,5 +47,10 @@
     "jsdom": "^29.1.1",
     "typescript": "~6.0.3",
     "vitest": "^4.1.9"
+  },
+  "reanimated": {
+    "staticFeatureFlags": {
+      "EXPERIMENTAL_CSS_ANIMATIONS_FOR_SVG_COMPONENTS": false
+    }
   }
 }

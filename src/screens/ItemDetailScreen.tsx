@@ -14,12 +14,14 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ActionButton } from '../components/ActionButton';
+import { EditableItemName } from '../components/EditableItemName';
 import { EnsoDivider } from '../components/EnsoDivider';
 import { PhotoFrame } from '../components/PhotoFrame';
 import { monthDayLabel } from '../lib/dateLabels';
 import { formatPriceDisplay } from '../lib/itemForm';
 import { clampPhotoIndex as clampIndex } from '../lib/photoSelection';
-import { captureAndStorePhoto } from '../lib/photoStorage';
+import { promptPhotoSource } from '../lib/photoSourcePrompt';
+import { captureAndStorePhoto, pickAndStorePhoto } from '../lib/photoStorage';
 import type { RootStackParamList } from '../navigation/types';
 import { useItems } from '../state/ItemsContext';
 import { useItemLoader } from '../state/useItemLoader';
@@ -28,7 +30,7 @@ import { colors, fonts, radii, urgency } from '../theme/tokens';
 type Props = NativeStackScreenProps<RootStackParamList, 'ItemDetail'>;
 
 export function ItemDetailScreen({ navigation, route }: Props) {
-  const { addPhoto } = useItems();
+  const { addPhoto, updateExistingItem } = useItems();
   const { item, loading, error: loadError } = useItemLoader(route.params.itemId);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
@@ -47,7 +49,7 @@ export function ItemDetailScreen({ navigation, route }: Props) {
     });
   }, [item?.coverIndex, item?.id, item?.photos.length, width]);
 
-  const handleAddPhoto = async () => {
+  const addPhotoFromSource = async (acquire: () => Promise<string | null>) => {
     if (!item) {
       return;
     }
@@ -55,7 +57,7 @@ export function ItemDetailScreen({ navigation, route }: Props) {
     const nextIndex = item.photos.length;
     setPhotoError(null);
     try {
-      const uri = await captureAndStorePhoto();
+      const uri = await acquire();
       if (uri) {
         await addPhoto(item.id, uri);
         setActivePhotoIndex(nextIndex);
@@ -66,6 +68,13 @@ export function ItemDetailScreen({ navigation, route }: Props) {
     } catch (caught) {
       setPhotoError(caught instanceof Error ? caught.message : '写真を追加できませんでした。');
     }
+  };
+
+  const handleAddPhoto = () => {
+    promptPhotoSource({
+      onCamera: () => void addPhotoFromSource(captureAndStorePhoto),
+      onLibrary: () => void addPhotoFromSource(pickAndStorePhoto),
+    });
   };
 
   const moveToPhoto = (index: number) => {
@@ -101,6 +110,7 @@ export function ItemDetailScreen({ navigation, route }: Props) {
   }
 
   const urgencyConfig = urgency[item.urgency];
+  const UrgencyIcon = urgencyConfig.icon;
   const memoryNote = item.memoryNote?.trim();
   const blockers = item.blockers.length > 0 ? item.blockers.join('、') : '-';
 
@@ -132,7 +142,7 @@ export function ItemDetailScreen({ navigation, route }: Props) {
                 uri={photo}
                 label={`写真 ${index + 1}`}
                 style={styles.heroPhoto}
-                contentFit="contain"
+                contentFit="cover"
                 backgroundColor={colors.washi}
               />
             </Pressable>
@@ -166,11 +176,16 @@ export function ItemDetailScreen({ navigation, route }: Props) {
       <ScrollView style={styles.body} contentContainerStyle={styles.bodyContent}>
         {photoError ? <Text style={styles.errorText}>{photoError}</Text> : null}
         <View style={styles.nameBlock}>
-          <Text style={styles.itemName}>{item.name}</Text>
+          <EditableItemName
+            name={item.name}
+            tone="kachi"
+            onSave={(name) => updateExistingItem(item.id, { name })}
+          />
           <View style={styles.metaRow}>
-            <View style={[styles.urgencyDot, { backgroundColor: urgencyConfig.color }]} />
+            <UrgencyIcon color={urgencyConfig.color} size={16} strokeWidth={2.2} />
+            <Text style={[styles.urgencyMeta, { color: urgencyConfig.color }]}>{urgencyConfig.label}</Text>
             <Text style={styles.meta}>
-              {urgencyConfig.label} ・ 写真{item.photos.length}枚 ・ {monthDayLabel(item.createdAt)}
+              ・ 写真{item.photos.length}枚 ・ {monthDayLabel(item.createdAt)}
             </Text>
           </View>
         </View>
@@ -345,12 +360,6 @@ const styles = StyleSheet.create({
   inactiveDot: {
     backgroundColor: 'rgba(44,46,99,0.2)',
   },
-  itemName: {
-    color: colors.sumi,
-    fontFamily: fonts.serifBold,
-    fontSize: 27,
-    textAlign: 'center',
-  },
   meta: {
     color: colors.subtext,
     fontFamily: fonts.sans,
@@ -427,9 +436,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.washi,
     flex: 1,
   },
-  urgencyDot: {
-    borderRadius: 4,
-    height: 8,
-    width: 8,
+  urgencyMeta: {
+    fontFamily: fonts.sansSemiBold,
+    fontSize: 15,
   },
 });

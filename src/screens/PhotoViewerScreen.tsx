@@ -1,5 +1,5 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ImageIcon, MoreHorizontal, Trash2, X } from 'lucide-react-native';
+import { Download, ImageIcon, MoreHorizontal, Trash2, X } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import {
   ScrollView,
@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { PhotoFrame } from '../components/PhotoFrame';
+import { downloadPhotoToLibrary } from '../lib/photoDownload';
 import { clampPhotoIndex as clampIndex } from '../lib/photoSelection';
 import type { RootStackParamList } from '../navigation/types';
 import { useItemLoader } from '../state/useItemLoader';
@@ -79,6 +80,24 @@ export function PhotoViewerScreen({ navigation, route }: Props) {
       setActionNotice('表紙にしました');
     } catch (caught) {
       setActionError(caught instanceof Error ? caught.message : '表紙を設定できませんでした。');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleDownloadPhoto = async () => {
+    if (busy || !item) {
+      return;
+    }
+    setMenuOpen(false);
+    setBusy(true);
+    setActionError(null);
+    setActionNotice(null);
+    try {
+      await downloadPhotoToLibrary(photos[currentIndex], item.name, currentIndex);
+      setActionNotice('ライブラリに保存しました');
+    } catch (caught) {
+      setActionError(caught instanceof Error ? caught.message : '画像をライブラリに保存できませんでした。');
     } finally {
       setBusy(false);
     }
@@ -192,6 +211,15 @@ export function PhotoViewerScreen({ navigation, route }: Props) {
       {menuOpen ? (
         <Pressable style={styles.menuBackdrop} onPress={() => setMenuOpen(false)}>
           <View style={styles.menuCard}>
+            {item?.status === 'discarded' ? (
+              <>
+                <Pressable disabled={busy} onPress={() => void handleDownloadPhoto()} style={styles.menuItem}>
+                  <Download color={colors.white} size={18} />
+                  <Text style={styles.menuLabel}>画像をライブラリに保存</Text>
+                </Pressable>
+                <View style={styles.menuDivider} />
+              </>
+            ) : null}
             <Pressable disabled={busy} onPress={() => void handleSetCover()} style={styles.menuItem}>
               <ImageIcon color={colors.white} size={18} />
               <Text style={styles.menuLabel}>表紙にする</Text>
@@ -290,7 +318,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 14,
     top: 74,
-    width: 200,
+    width: 264,
   },
   menuDangerLabel: {
     color: '#e08a80',
