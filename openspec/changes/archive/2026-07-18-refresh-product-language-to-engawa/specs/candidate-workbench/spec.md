@@ -4,7 +4,7 @@
 
 システムは、内部 `status='candidate'` のitemをuser-facingには「縁側」のモノとして、表紙写真つきの2列グリッドで既定表示し、コンパクトな縦リストへ切り替える手段を SHALL 提供する。読み込み中・エラー・itemゼロの各状態を、それぞれ静かな表示で MUST 区別して示す。
 
-#### Scenario: 縁側のモノをグリッド表示する
+#### Scenario: 候補をグリッド表示する
 - **WHEN** ユーザーが「縁側」タブを開く
 - **THEN** 内部 `status='candidate'` の各itemを表紙写真（`photos[coverIndex] ?? photos[0]`）つきの2列グリッドで表示する
 
@@ -12,7 +12,7 @@
 - **WHEN** ユーザーがリスト表示を選ぶ
 - **THEN** 縁側の各itemをより多く見渡せるコンパクトな縦リストで表示する
 
-#### Scenario: 縁側にモノが無い
+#### Scenario: 候補が無い
 - **WHEN** 内部 `status='candidate'` のitemが1件も無い状態で縁側を開く
 - **THEN** 「捨てるでも、残すでもない。ここは、モノの縁側です。」を含む空状態（EmptyState）を表示する
 
@@ -40,7 +40,7 @@
 
 システムは、縁側のitemをタップしてその記録詳細へ遷移する手段を SHALL 提供する。
 
-#### Scenario: 縁側のモノをタップする
+#### Scenario: 候補をタップする
 - **WHEN** ユーザーが縁側のグリッドまたはリスト上のitemをタップする
 - **THEN** そのitemの詳細画面（ItemDetail）へ遷移する
 
