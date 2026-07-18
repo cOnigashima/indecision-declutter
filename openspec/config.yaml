@@ -2,12 +2,12 @@ schema: spec-driven
 
 context: |
   プロダクト: 不断捨離 (Indecision Declutter)。片付け中に「捨てるか残すか」で
-  手が止まる瞬間を、写真と記録の一時退避で受け止めるローカルファーストアプリ。
+  手が止まる瞬間に写真と記録の写しを収め、モノを縁側へ置けるローカルファーストアプリ。
 
-  コア原則: 決断しないで、退避する。
-  - ユーザー向けコピーは「保存」より「退避」を使う。
+  コア原則: 決めずに、写しを収める。
+  - 写真と記録を作る行為は「写しを収める」、未決定のモノのuser-facingな居場所は「縁側」と呼ぶ。
   - 手放しは削除ではなく「変容」。写真と記録は捨離に残る。
-  - 円相の色: 青=退避 / グレー=確認 / 朱=手放し完了。
+  - 円相の色: 青=写しは収まり判断は開いたまま / グレー=手放し確認 / 朱=手放し完了。
   - バックエンド・クラウド同期は追加しない。端末内に閉じる。
 
   技術スタック: Expo SDK 57 / React Native / TypeScript / React Navigation /
@@ -15,20 +15,19 @@ context: |
   Lucide React Native / Vitest。
 
   ドメイン用語:
-  - item: 退避されたモノ。status は candidate(候補) / discarded(捨離)。
-  - 退避 = 撮影して候補へ保持する。手放す = 候補から捨離へ移す(変容)。
+  - item: 写しを収めたモノ。status は candidate(縁側・内部名) / discarded(捨離)。
+  - 写しを収める = 撮影してitemを作る。手放す = 縁側から捨離へ移す(変容)。
   - urgency(捨てたい度): 0〜3。既定は 1(迷い)。
   - blockers(迷った理由タグ) / memoryNote(想いメモ) / coverIndex(表紙写真)。
 
   規約:
   - 視覚定数は src/theme/tokens.ts に集約。画面に色/フォント名を散らさない。
-  - 正本は docs/design/design_handoff_indecision_declutter と AGENTS.md。
-  - .dc.html は参照プロトタイプ。HTML を製品コードにコピーしない。
+  - デザイン言語の正本は docs/PHILOSOPHY.md、画面別仕様は docs/specs/product-spec.md、実装規範は AGENTS.md。
   - ドメイン不変条件は src/lib/itemRepositoryRules.ts に集約。
 
 rules:
   proposal:
-    - ユーザー向けコピーは「退避」「手放し」「変容」を使い、「削除」「保存」を避ける
+    - ユーザー向けコピーは「写しを収める」「縁側」「手放し」「捨離」「変容」を文脈ごとに使い、実操作以外の「削除」「保存」を避ける
     - Non-goals にローカルファースト原則(バックエンド/同期を足さない)を明記する
   spec:
     - シナリオは日本語で WHEN/THEN 形式に統一する

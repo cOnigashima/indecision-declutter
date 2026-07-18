@@ -1,6 +1,6 @@
 # 不断捨離 実装レビュー（Archived）
 
-このレビューは 2026-07-05 時点の移行レビューです。指摘の一部は解消済み、また完了演出の自動遷移は手動導線を正とする仕様へ変更済みです。現行仕様は `docs/specs/product-spec.md` と `docs/design/design_handoff_indecision_declutter/README.md` を参照してください。
+このレビューは 2026-07-05 時点の移行レビューです。指摘の一部は解消済み、また完了演出の自動遷移は手動導線を正とする仕様へ変更済みです。現行仕様は `docs/specs/product-spec.md` と `docs/PHILOSOPHY.md` を参照してください。
 
 レビュー日: 2026-07-05
 基準仕様: `docs/specs/product-spec.md`

@@ -3,7 +3,7 @@
 状態: draft
 作成日: 2026-07-05
 対象: root Expo / React Native 実装
-関連仕様: `docs/specs/product-spec.md`, `docs/design/design_handoff_indecision_declutter`
+関連仕様: `docs/specs/product-spec.md`, `docs/PHILOSOPHY.md`
 
 ## 1. 目的
 
@@ -21,8 +21,8 @@
 
 - バックエンド、アカウント、クラウド同期は追加しない。
 - 旧 Vue/PWA 実装へ戻さない。
-- design handoff の `.dc.html` を製品コードへコピーしない。
-- 完了演出を自動遷移には戻さない。退避完了・手放し完了は手動導線が正。
+- 初期カンプ（`.dc.html`、git 履歴 commit `4190750`）の HTML を製品コードへコピーしない。
+- 完了演出を自動遷移には戻さない。写しを収めた完了・手放し完了は手動導線が正。
 - 大規模なフォルダ再編は先に行わない。責務を切り出しながら必要になった範囲で移動する。
 
 ## 3. 現状評価
@@ -31,7 +31,7 @@
 
 - `src/screens`, `src/components`, `src/lib`, `src/state`, `src/navigation`, `src/theme`, `src/types` の層分けは現規模では妥当。
 - pure helper と SQLite repository のテストは増えており、`npm run typecheck` と `npm test` は通る。
-- React Navigation の11画面構成、SQLite保存、写真保存、候補/捨離の基本フローは成立している。
+- React Navigation の11画面構成、SQLite保存、写真保存、縁側/捨離の基本フローは成立している。
 
 主な弱点:
 
@@ -67,7 +67,7 @@
   - `assertCreateItemInput`
   - urgency/status validation
 - `src/lib/photoDraft.ts`
-  - 未退避写真の draft 管理に必要な pure helper
+  - 未item化写真の draft 管理に必要な pure helper
   - keep/remove/reorder 時の cleanup 対象計算
 - `src/state/useItemLoader.ts`
   - `findItem` で見つからなければ `loadItem` する
@@ -76,7 +76,7 @@
   - add / remove / setCover / reorder の use-case API をまとめる
   - 画面から DB と file cleanup の順序を隠す
 - `src/screens/hooks/useCaptureDraft.ts`
-  - Capture 画面の未退避写真、active index、撮り直し、やめる、退避を管理する
+  - Capture 画面の未item化写真、active index、撮り直し、やめる、写しを収める操作を管理する
 
 hooks は初回から過剰に抽象化しない。2画面以上で同じ副作用順序が必要なものだけ切り出す。
 
@@ -160,7 +160,7 @@ type RemovePhotoResult = {
 - `やめる` は draft 写真を全削除して一覧へ戻る。
 - `撮り直す` は現在の撮影分だけ削除し、新しい撮影結果で置き換える。
 - `もう1枚` で撮影に失敗・キャンセルした場合、既存 draft は維持する。
-- `退避` 中に item 作成が失敗した場合、draft は画面上に残す。ユーザーが再試行または `やめる` で cleanup できる。
+- 「写しを収める」処理中に item 作成が失敗した場合、draft は画面上に残す。ユーザーが再試行または `やめる` で cleanup できる。
 - item 作成成功後は draft の所有権が item に移る。以降は undo / item 削除の責務で cleanup する。
 - 最後の1枚を削除しようとした場合のユーザー向けコピーは「写真は1枚以上必要です。」とする。
 
@@ -198,9 +198,9 @@ type RemovePhotoResult = {
 - Capture draft の責務を `useCaptureDraft` に切り出す。
 - `やめる` で draft 写真を `deleteStoredPhoto` する。
 - `撮り直す` で現在写真だけ cleanup してから再撮影する。
-- 退避成功時は draft cleanup をしない。item が所有者になるため。
+- item 作成成功時は draft cleanup をしない。item が所有者になるため。
 - 詳細/編集で写真追加後に DB 更新が失敗した場合、追加直後のファイルを cleanup する。
-- item 削除 / 退避取り消し時の写真 cleanup は現行どおり維持する。
+- item 削除 / 「今の記録を取り消す」時の写真 cleanup は現行どおり維持する。
 
 受け入れ条件:
 
@@ -262,9 +262,9 @@ type RemovePhotoResult = {
 
 受け入れ条件:
 
-- 375x812 で候補一覧、撮影、詳細、編集、ビューア、捨離一覧、捨離詳細、儀式画面が破綻しない。
+- 375x812 で縁側、撮影、詳細、編集、ビューア、捨離一覧、捨離詳細、儀式画面が破綻しない。
 - 直書き色は一時的な白黒以外、semantic token に寄せる。
-- 捨離が候補と視覚的に区別できる。
+- 捨離が縁側と視覚的に区別できる。
 
 ### Phase 6: Test expansion
 
@@ -330,12 +330,12 @@ type RemovePhotoResult = {
 - FABからCaptureへ入り、カメラ権限許可後に撮影できる。
 - `やめる` で item が作られず、再起動後も不要な記録がない。
 - `撮り直す` で現在写真だけ置き換わる。
-- 複数写真 item を退避できる。
-- 退避完了で `次を撮る`, `候補一覧へ戻る`, `退避を取り消す` が動く。
+- 複数写真 item の写しを収められる。
+- 写しを収めた完了で `次を撮る`, `縁側へ戻る`, `今の記録を取り消す` が動く。
 - 詳細から写真追加、ビューア、表紙設定、写真削除が動く。
 - 編集で全項目が永続化され、詳細/捨離詳細へ反映される。
 - 手放し確認から捨離へ移り、写真と記録が残る。
-- 捨離詳細から候補へ戻せる。
+- 捨離詳細から縁側へ戻せる。
 - アプリ再起動後も item と写真が残る。
 - カメラ権限拒否時にユーザー向けエラーが出る。
 - 375x812 でテキストやボタンが重ならない。

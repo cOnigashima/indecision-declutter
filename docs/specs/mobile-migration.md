@@ -2,7 +2,7 @@
 
 ## Summary
 
-Migrate 不断捨離 from the legacy Vue/PWA implementation to a root Expo / React Native app. The design handoff in `docs/design/design_handoff_indecision_declutter` is the visual and interaction source of truth.
+Migrate 不断捨離 from the legacy Vue/PWA implementation to a root Expo / React Native app. The visual and interaction source of truth is `docs/PHILOSOPHY.md` (design language) and `docs/specs/product-spec.md` (per-screen spec); the original hi-fi comps remain in git history at commit `4190750`.
 
 The first slice established the app skeleton: Expo runtime, routing, design tokens, fonts, enso assets, and placeholder screens for the full 11-screen flow. The second slice adds local SQLite persistence plus the camera/photo storage loop.
 
@@ -22,14 +22,14 @@ The first slice established the app skeleton: Expo runtime, routing, design toke
 - SQLite persistence lives in `src/lib/db.ts`, with `items` and `item_photos` tables.
 - Captured photos are compressed to JPEG and copied into `FileSystem.documentDirectory/indecision-photos/` via `src/lib/photoStorage.ts`.
 - App data is exposed through `src/state/ItemsContext.tsx`.
-- Legacy Vue/PWA files live in `legacy/vue-pwa/`.
+- The pre-migration Vue/PWA files remain in git history (recoverable from commit `4190750`); they are no longer in the working tree.
 
 ## Deferred Slices
 
 1. Full edit form coverage for price, location, last-used date, blockers, and photo removal/reorder.
 2. Gesture-based carousel/photo viewer and photo reorder.
 3. Undo affordances for release and evacuation.
-4. Pixel-pass against the design comps on iPhone-sized viewport.
+4. Pixel-pass against the design language (`docs/PHILOSOPHY.md` / `docs/specs/product-spec.md`) on iPhone-sized viewport.
 
 ## Acceptance For This Slice
 
