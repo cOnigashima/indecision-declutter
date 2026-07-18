@@ -1,7 +1,9 @@
 # product-language Specification
 
 ## Purpose
-TBD - created by archiving change refresh-product-language-to-engawa. Update Purpose after archive.
+
+不断捨離のuser-facingな語彙を、行為の「写しを収める」、未決定のモノが身を置く「縁側」、記録を残したまま移る「手放す→捨離」に分け、捨てる／残すの即決を迫らない体験として一貫させる。手放したあとも写しと記録を捨離に残し、モノとの記憶の縁を絶やさない。
+
 ## Requirements
 ### Requirement: 行為・居場所・変容を呼び分ける
 
@@ -21,15 +23,23 @@ TBD - created by archiving change refresh-product-language-to-engawa. Update Pur
 
 ### Requirement: モノの縁側を説明する
 
-システムは、「縁側」が捨てる／残すをまだ決めないモノの居場所であることを、既存フロー内のコピーで SHALL 説明する。説明のためだけの新しいオンボーディング画面や永続フラグを追加してはならない（MUST NOT）。
+システムは、「縁側」が捨てる／残すをまだ決めないモノの居場所であることを、定型説明「捨てるでも、残すでもない。ここは、モノの縁側です。」で SHALL 説明する。この説明は、縁側にitemが1件もない空状態と、写しを収めた完了画面に SHALL 表示し、それ以外の通常一覧、絞り込み結果ゼロ、その他の画面に常設してはならない（MUST NOT）。説明のためだけの新しいオンボーディング画面や永続フラグを追加してはならない（MUST NOT）。
 
 #### Scenario: 空状態で縁側を知る
-- **WHEN** 縁側にitemが無い状態で一覧を開く
+- **WHEN** 縁側にitemが1件もない状態で一覧を開く
 - **THEN** 「捨てるでも、残すでもない。ここは、モノの縁側です。」と表示する
 
 #### Scenario: 写しを収めた結果を知る
 - **WHEN** 写しを収めた完了画面を表示する
-- **THEN** 「写しを収めました」と「このモノは、縁側へ」を表示し、行為と居場所の関係を示す
+- **THEN** 「写しを収めました」「このモノは、縁側へ」「捨てるでも、残すでもない。ここは、モノの縁側です。」を表示し、行為、移り先、縁側の意味を示す
+
+#### Scenario: モノがある縁側では説明を繰り返さない
+- **WHEN** 縁側にitemが1件以上ある状態で一覧を開く
+- **THEN** item一覧を表示し、定型説明は表示しない
+
+#### Scenario: 絞り込み結果ゼロを空状態と混同しない
+- **WHEN** 縁側にitemが存在するが、選んだ絞り込み条件に合致するitemがない
+- **THEN** 「この条件のモノはありません」と表示し、定型説明は表示しない
 
 ### Requirement: 実保存と実削除を明確に示す
 
@@ -50,4 +60,3 @@ TBD - created by archiving change refresh-product-language-to-engawa. Update Pur
 #### Scenario: スクリーンリーダーで縁側タブを読む
 - **WHEN** スクリーンリーダー利用者が左タブへフォーカスする
 - **THEN** 「縁側」と、捨てるか残すかをまだ決めていないモノの場所である旨が読み上げられる
-
