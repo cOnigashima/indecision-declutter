@@ -218,7 +218,7 @@ export function CaptureScreen({ navigation }: Props) {
         navigation.replace('EvacuationComplete', { itemId, returnTo: 'capture' });
       }
     } catch (caught) {
-      setSaveError(caught instanceof Error ? caught.message : '退避できませんでした。');
+      setSaveError(caught instanceof Error ? caught.message : '写しを収められませんでした。');
     } finally {
       setSaving(false);
     }
@@ -297,7 +297,7 @@ export function CaptureScreen({ navigation }: Props) {
             <Text style={styles.cameraPermissionTitle}>
               {cameraPermission ? 'カメラの許可が必要です' : 'カメラを準備しています'}
             </Text>
-            <Text style={styles.cameraPermissionText}>ライブラリの写真から退避を始めることもできます。</Text>
+            <Text style={styles.cameraPermissionText}>ライブラリの写真から、写しを収めることもできます。</Text>
             {cameraPermission ? (
               <Pressable onPress={() => void handleRequestCameraPermission()} style={styles.permissionButton}>
                 <Text style={styles.permissionButtonText}>カメラを許可</Text>
@@ -482,19 +482,19 @@ export function CaptureScreen({ navigation }: Props) {
         {canRelease(photos) ? (
           <>
             <ActionButton
-              label={saving ? '退避中' : '退避して、次を撮る'}
+              label={saving ? '収めています' : '写しを収めて、次を撮る'}
               icon={Camera}
               onPress={() => void saveItem('capture')}
             />
             <ActionButton
-              label="退避して、書き留める"
+              label="写しを収めて、書き留める"
               tone="outline"
               icon={Edit3}
               onPress={() => void saveItem('edit')}
             />
           </>
         ) : (
-          <Text style={styles.gateHint}>写真を撮ると、退避できます</Text>
+          <Text style={styles.gateHint}>まず、写真を一枚撮りましょう</Text>
         )}
       </View>
     </View>

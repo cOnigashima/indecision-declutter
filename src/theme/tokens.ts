@@ -118,7 +118,7 @@ export const urgencySelector = {
   iconUnselected: 31,
 } as const;
 
-// 撮影レビューは4択と退避ボタンを同じシートに収めるため、完成カンプの
+// 撮影レビューは4択と「写しを収める」ボタンを同じシートに収めるため、
 // 50ptアイコン枠に寄せた専用寸法を使う。円相のアニメーションも枠内に収める。
 export const captureUrgencySelector = {
   circle: 60,
@@ -138,10 +138,10 @@ export const shadows = {
   },
   fab: {
     shadowColor: colors.kachi,
-    shadowOpacity: 0.5,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 8,
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
   },
   button: {
     shadowColor: '#000',

@@ -28,7 +28,7 @@
       [
         "expo-image-picker",
         {
-          "cameraPermission": "迷っているモノを撮影して退避するためにカメラを使用します。",
+          "cameraPermission": "迷っているモノの写しを収めるためにカメラを使用します。",
           "photosPermission": "撮影済みの写真を不断捨離の記録に追加するために写真へのアクセスを使用します。",
           "microphonePermission": false
         }
@@ -44,14 +44,15 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "迷っているモノを撮影して退避するためにカメラを使用します。",
+          "cameraPermission": "迷っているモノの写しを収めるためにカメラを使用します。",
           "microphonePermission": false,
           "recordAudioAndroid": false,
           "barcodeScannerEnabled": false
         }
       ],
       "expo-sqlite",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      "expo-status-bar"
     ]
   }
 }

@@ -36,60 +36,67 @@ export function CandidateListScreen() {
   return (
     <SafeAreaView edges={['top']} style={styles.safe}>
       <AppHeader />
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow}>
-          {filterChips.map((chip) => {
-            const config = chip.urgency === undefined ? undefined : urgency[chip.urgency];
-            const Icon = config?.icon;
-            const label = config?.label ?? '全部';
-            const selected =
-              chip.urgency === undefined ? selectedUrgency === undefined : selectedUrgency === chip.urgency;
-            return (
-              <Pressable
-                key={label}
-                accessibilityRole="button"
-                accessibilityState={{ selected }}
-                onPress={() => {
-                  if (chip.urgency === undefined) {
-                    setSelectedUrgency(undefined);
-                    return;
-                  }
+      <ScrollView
+        contentContainerStyle={[styles.content, !loading && candidates.length === 0 && styles.emptyContent]}
+        showsVerticalScrollIndicator={false}
+      >
+        {candidates.length > 0 ? (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow}>
+            {filterChips.map((chip) => {
+              const config = chip.urgency === undefined ? undefined : urgency[chip.urgency];
+              const Icon = config?.icon;
+              const label = config?.label ?? '全部';
+              const selected =
+                chip.urgency === undefined ? selectedUrgency === undefined : selectedUrgency === chip.urgency;
+              return (
+                <Pressable
+                  key={label}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected }}
+                  onPress={() => {
+                    if (chip.urgency === undefined) {
+                      setSelectedUrgency(undefined);
+                      return;
+                    }
 
-                  setSelectedUrgency((current) => (current === chip.urgency ? undefined : chip.urgency));
-                }}
-                style={[
-                  styles.filterChip,
-                  config
-                    ? {
-                        backgroundColor: selected ? config.filterBackground : colors.card,
-                        borderColor: selected ? config.filterBorder : colors.borderLight,
-                      }
-                    : selected && styles.activeAllChip,
-                ]}
-              >
-                {Icon && config ? (
-                  <Icon color={config.color} size={selected ? 16 : 15} strokeWidth={2.25} />
-                ) : null}
-                <Text
+                    setSelectedUrgency((current) => (current === chip.urgency ? undefined : chip.urgency));
+                  }}
                   style={[
-                    styles.filterText,
-                    config && { color: config.color },
-                    selected && styles.selectedFilterText,
-                    !config && selected && styles.activeAllFilterText,
+                    styles.filterChip,
+                    config
+                      ? {
+                          backgroundColor: selected ? config.filterBackground : colors.card,
+                          borderColor: selected ? config.filterBorder : colors.borderLight,
+                        }
+                      : selected && styles.activeAllChip,
                   ]}
                 >
-                  {label}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
+                  {Icon && config ? (
+                    <Icon color={config.color} size={selected ? 16 : 15} strokeWidth={2.25} />
+                  ) : null}
+                  <Text
+                    style={[
+                      styles.filterText,
+                      config && { color: config.color },
+                      selected && styles.selectedFilterText,
+                      !config && selected && styles.activeAllFilterText,
+                    ]}
+                  >
+                    {label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+        ) : null}
 
         {loading ? <Text style={styles.stateText}>読み込み中</Text> : null}
         {error ? <Text style={styles.stateText}>記録を読み込めませんでした</Text> : null}
         {!loading && candidates.length === 0 ? <EmptyState /> : null}
         {!loading && candidates.length > 0 && filteredCandidates.length === 0 ? (
-          <Text style={styles.stateText}>{hasFilters ? 'この条件の候補はありません' : '候補はありません'}</Text>
+          <Text style={styles.stateText}>
+            {hasFilters ? 'この条件のモノはありません' : '縁側にはまだ、モノがありません'}
+          </Text>
         ) : null}
         {!loading && candidates.length > 0 ? (
           <View style={styles.viewControls}>
@@ -132,6 +139,10 @@ const styles = StyleSheet.create({
   content: {
     paddingBottom: 104,
     paddingHorizontal: 16,
+  },
+  emptyContent: {
+    flexGrow: 1,
+    paddingBottom: 0,
   },
   filterChip: {
     alignItems: 'center',

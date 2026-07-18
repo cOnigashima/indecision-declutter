@@ -15,7 +15,7 @@ type EditableItemNameProps = {
 
 /**
  * 品名をその場で編集できる見出し。詳細画面から編集画面へ移らずに「呼び名」を
- * 直せるようにする。tone で候補（勝色）/ 捨離（朱）のアクセントを切り替える。
+ * 直せるようにする。tone で縁側（内部candidate・勝色）/ 捨離（朱）のアクセントを切り替える。
  */
 export function EditableItemName({ name, onSave, tone = 'kachi' }: EditableItemNameProps) {
   const [editing, setEditing] = useState(false);

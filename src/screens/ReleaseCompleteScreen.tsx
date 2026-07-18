@@ -49,7 +49,7 @@ export function ReleaseCompleteScreen({ navigation, route }: Props) {
           onPress={() => navigation.replace('Tabs', { screen: 'CandidateList' })}
           style={styles.candidateButton}
         >
-          <Text style={styles.candidateText}>候補一覧へ戻る</Text>
+          <Text style={styles.candidateText}>縁側へ戻る</Text>
         </Pressable>
       </View>
     </View>

@@ -25,6 +25,7 @@ export function BottomNav({ state, navigation }: BottomTabBarProps) {
     <View style={[styles.wrap, { paddingBottom: Math.max(insets.bottom, 0) }]}>
       <View style={styles.bar}>
         <Pressable
+          accessibilityLabel="縁側、捨てるか残すかをまだ決めていないモノ"
           accessibilityRole="button"
           accessibilityState={{ selected: candidateActive }}
           onPress={() => goTab('CandidateList')}
@@ -35,10 +36,10 @@ export function BottomNav({ state, navigation }: BottomTabBarProps) {
             size={candidateActive ? 34 : 29}
             strokeWidth={candidateActive ? 2.6 : 2.15}
           />
-          <Text style={[styles.label, candidateActive && styles.activeLabel]}>候補</Text>
+          <Text style={[styles.label, candidateActive && styles.activeLabel]}>縁側</Text>
         </Pressable>
 
-        <Pressable accessibilityRole="button" onPress={goCapture} style={styles.fab}>
+        <Pressable accessibilityLabel="写真を撮って、写しを収める" accessibilityRole="button" onPress={goCapture} style={styles.fab}>
           <Camera color={colors.white} size={32} strokeWidth={2.2} />
         </Pressable>
 

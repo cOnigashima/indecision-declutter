@@ -12,7 +12,7 @@ type EmptyStateProps = {
 
 export function EmptyState({
   title = '捨てるか迷ったら、\n撮る。',
-  body = '迷いは、捨てなくていい。\nひとまず、ここへ退避しましょう。',
+  body = '捨てるでも、残すでもない。\nここは、モノの縁側です。',
   hint = '下の カメラ から',
 }: EmptyStateProps) {
   return (

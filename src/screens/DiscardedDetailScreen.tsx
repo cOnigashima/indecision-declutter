@@ -209,7 +209,7 @@ export function DiscardedDetailScreen({ navigation, route }: Props) {
           </View>
           <Text style={styles.note}>{item.memoryNote ?? '記録はまだありません。'}</Text>
         </View>
-        <ActionButton label="やっぱり候補に戻す" tone="outline" icon={RotateCcw} onPress={() => void handleRestore()} />
+        <ActionButton label="もう一度、縁側へ" tone="outline" icon={RotateCcw} onPress={() => void handleRestore()} />
         <Text style={styles.caption}>手放したことにしたけれど、まだ手元にある時に</Text>
       </ScrollView>
     </View>

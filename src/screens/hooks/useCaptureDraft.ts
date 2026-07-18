@@ -23,7 +23,7 @@ type CaptureDraftApi = {
   retakePhoto: (acquire?: PhotoAcquirer) => Promise<string | null>;
   /** やめる: delete every draft file. */
   cancelDraft: () => Promise<void>;
-  /** 退避成功後: ownership moved to the item, reset without deleting files. */
+  /** item作成成功後: ownership moved to the item, reset without deleting files. */
   releaseDraft: () => void;
   selectPhoto: (index: number) => void;
 };

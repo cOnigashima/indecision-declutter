@@ -49,7 +49,7 @@ export function EvacuationCompleteScreen({ navigation, route }: Props) {
       await removeExistingItem(itemId);
       navigateAfterComplete();
     } catch (caught) {
-      setUndoError(caught instanceof Error ? caught.message : '退避を取り消せませんでした。');
+      setUndoError(caught instanceof Error ? caught.message : '今の記録を取り消せませんでした。');
       setUndoing(false);
     }
   };
@@ -74,7 +74,11 @@ export function EvacuationCompleteScreen({ navigation, route }: Props) {
             }}
           />
         </View>
-        <Text style={styles.title}>退避しました</Text>
+        <Text style={styles.title}>写しを収めました</Text>
+        <Text style={styles.destination}>このモノは、縁側へ</Text>
+        <Text style={styles.explanation}>
+          捨てるでも、残すでもない。{'\n'}ここは、モノの縁側です。
+        </Text>
         <Text style={styles.count}>本日 {todayCount} つめ</Text>
         <Text style={styles.caption}>— 見届けたら、次へ —</Text>
         {undoError ? <Text style={styles.errorText}>{undoError}</Text> : null}
@@ -89,7 +93,7 @@ export function EvacuationCompleteScreen({ navigation, route }: Props) {
           onPress={() => navigation.replace('Tabs', { screen: 'CandidateList' })}
           style={styles.candidateButton}
         >
-          <Text style={styles.candidateText}>候補一覧へ戻る</Text>
+          <Text style={styles.candidateText}>縁側へ戻る</Text>
         </Pressable>
         <Pressable
           accessibilityRole="button"
@@ -97,7 +101,7 @@ export function EvacuationCompleteScreen({ navigation, route }: Props) {
           onPress={() => void handleUndo()}
           style={[styles.snack, (!itemId || undoing) && styles.snackDisabled]}
         >
-          <Text style={styles.snackText}>{undoing ? '取り消しています' : '退避を取り消す'}</Text>
+          <Text style={styles.snackText}>{undoing ? '取り消しています' : '今の記録を取り消す'}</Text>
         </Pressable>
       </View>
     </View>
@@ -139,6 +143,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 8,
   },
+  destination: {
+    color: colors.kachi,
+    fontFamily: fonts.serif,
+    fontSize: 17,
+    marginTop: 6,
+  },
   errorText: {
     color: colors.dangerText,
     fontFamily: fonts.sans,
@@ -156,6 +166,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 18,
     overflow: 'visible',
+  },
+  explanation: {
+    color: colors.subtext,
+    fontFamily: fonts.serif,
+    fontSize: 15,
+    lineHeight: 24,
+    marginTop: 8,
+    textAlign: 'center',
   },
   nextButton: {
     alignItems: 'center',
